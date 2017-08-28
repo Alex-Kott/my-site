@@ -71,6 +71,10 @@
 	margin: 0 auto;
 }
 
+.editWindow{
+	display: none;
+}
+
 textarea{
 	width: 100%;
 	min-height: 150px;
@@ -78,8 +82,6 @@ textarea{
 	outline: none;
 	padding: 15px;
 	font-size: 1.3em;
-
-	display: none;
 }
 
 .addPost, .savePost{
@@ -96,6 +98,18 @@ textarea{
 
 .savePost{
 	display: none;
+}
+
+.post{
+	background: #ccc;
+	border-radius: 10px;
+	padding: 10px;
+	margin: 10px 0;
+}
+
+.author{
+	opacity: 0.5;
+	margin: 10px;
 }
 </style>
 
@@ -175,25 +189,33 @@ function setUserId(screen_name) {
 
 
 $(".addPost").on("click", function(){
-	$("textarea").fadeIn(150)
+	$(".editWindow").fadeIn(150)
 	$(".addPost").fadeOut(150);
 	$(".savePost").fadeIn(150);
 });
 
-var posts = [];
+// var posts = [];
 
 $(".savepost").on("click", function(){
-	//posts = JSON.parse(localStorage.getItem("posts"))
+	var posts = JSON.parse(localStorage.getItem("posts"))
+	if(posts === null){
+		posts = new Array();
+	}
+	var author = vk.data.user.first_name+" "+vk.data.user.last_name;
 	var text = $("textarea").val()
 	var post = {
 		text: text,
-		author: vk.data.user.first_name+" "+vk.data.user.last_name
+		author: author
 	}
 	posts.push(post);
-	console.log(JSON.parse(JSON.stringify(posts)))
-	//posts.push(post);
-	//localStorage.setItem("posts", JSON.stringify(posts))
+	localStorage.setItem("posts", JSON.stringify(posts))
 
+	$(".posts").append(`<div class='post'><div class='author'>${author} пишет:</div><div class='text'>${text}</div></div>`);
+	$("textarea").val("")
+
+	$(".editWindow").fadeOut(200);
+	$(".savePost").fadeOut(200);
+	$(".addPost").fadeIn(200);
 })
 
 
