@@ -11,17 +11,32 @@
 </div>
 
 
-
 <div class="main">
-	<div class="posts">
+	<form method="POST">
+		{% csrf_token %}
+		<div class="posts">
+		{% if posts %}
+			{% for post in posts %}
+				<div class='post'>
+					<div class='author'>{{ post.author }} пишет:</div>
+					<div class='text'>{{ post.post_text }}</div>
+				</div>
+
+			{% endfor %}
+		{% else %}
+			<h2> В блоге ещё нет постов </h2>
+		{% endif %}
 
 
-	</div>
-	<div class="editWindow">
-		<textarea></textarea>
-	</div>
-	<button class="savePost">Сохранить пост</button>
-	<button class="addPost">Добавить пост</button>
+		</div>
+		<div class="editWindow">
+			<input type="text" name="txt" class="txt">
+			<input type="text" name="username" class="username" placeholder="Автор">
+		</div>
+		
+		<input type="submit" class="savePost" value="Сохранить пост">
+		<input type="button" class="addPost" value="Добавить пост">
+	</form>
 </div>
 
 
@@ -75,7 +90,14 @@
 	display: none;
 }
 
-textarea{
+input[type=text]{
+	width: 100%;
+	border-radius: 10px;
+	padding: 5px;
+	margin: 5px 0;
+}
+
+textarea, .txt{
 	width: 100%;
 	min-height: 150px;
 	border-radius: 10px;
@@ -153,6 +175,9 @@ var vk = {
                     $("#login").css({"display":"none"});
                     $("#logout").css({"display":"block"});
                     isLogin = true;
+                    
+                    var author = vk.data.user.first_name+" "+vk.data.user.last_name;
+                    $(".username").val(author);
 
                     user_link = $("#user").val();
 				    var re = /\/{0}\w*$/ig;
@@ -217,7 +242,6 @@ $(".savepost").on("click", function(){
 	posts.push(post);
 	localStorage.setItem("posts", JSON.stringify(posts))
 
-	$(".posts").append(`<div class='post'><div class='author'>${author} пишет:</div><div class='text'>${text}</div></div>`);
 	$("textarea").val("")
 
 	$(".editWindow").fadeOut(200);

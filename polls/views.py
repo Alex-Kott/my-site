@@ -1,21 +1,19 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
+from django.utils import timezone
 
 from .models import Posts
 
 def index(request):
-	print(request)
-	latest_question_list = Question.objects.order_by('-pub_date')[:5]
-	context = {'latest_question_list': latest_question_list}
+	form = request.POST
+	try:
+		p = Posts(post_text = form['txt'], author = form['username'], date = timezone.now())
+		p.save()
+	except:
+		print("Posts doesn't exist")
+	posts = Posts.objects.all()
+	print(posts)
+	context = { 'posts' : posts}
 	return render(request, 'polls/index.html', context)
 
-def detail(request, question_id):
-	return HttpResponse("You're looking at quetion %s." % question_id)
-
-def results(request, question_id):
-	response = "You're looking at the results of question %s."
-	return HttpResponse(response % question_id)
-
-def vote(request, question_id):
-	return HttpResponse("You're voting on question %s. " % question_id)
