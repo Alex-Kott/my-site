@@ -201,7 +201,14 @@ $(".savepost").on("click", function(){
 	if(posts === null){
 		posts = new Array();
 	}
-	var author = vk.data.user.first_name+" "+vk.data.user.last_name;
+	try{
+		var author = vk.data.user.first_name+" "+vk.data.user.last_name;
+	} catch(err){
+		console.log(err)
+		author = "User1"
+	}
+
+
 	var text = $("textarea").val()
 	var post = {
 		text: text,
