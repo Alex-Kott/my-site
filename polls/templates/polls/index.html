@@ -47,7 +47,7 @@
 <form class="registration" action="sign-up/" method="POST">
 	{% csrf_token %}
 	<span class="close">×</span>
-	<input type="text" name="login" class="login" placeholder="Ваша почта или логин">
+	<input type="email" name="login" class="login" placeholder="Почта">
 	<input type="password" name="password" placeholder="Пароль">
 	<input type="password" name="password2" placeholder="Повторите пароль">
 	<input type="submit" value="Регистрация">
@@ -56,7 +56,7 @@
 <form class="auth" action="auth/" method="POST">
 	{% csrf_token %}
 	<span class="close">×</span>
-	<input type="login" name="login" class="login" placeholder="Логин или почта">
+	<input type="email" name="login" class="login" placeholder="Почта">
 	<input type="password" name="password" class="password" placeholder="Пароль">
 	<input type="submit" value="Войти">
 </form>
@@ -223,6 +223,10 @@ var timeoutStack = [];
 var isLogin = false;
 var to = 500; // timeout. По хорошему его нужно автоматически вычислять в зависимости от кол-ва друзей у юзера
 var auth_source = localStorage.getItem("auth_source"); // авторизован через vk или email
+{% if login %}
+	var user = {{ login }}
+	var password = {{ password }}
+{% endif %}
 
 
 var vk = {
@@ -246,7 +250,7 @@ var vk = {
                     isLogin = true;
                     
                     var user = vk.data.user.first_name+" "+vk.data.user.last_name;
-                    $(".user").val(user);
+                    
 
                     user_link = $("#user").val();
 				    var re = /\/{0}\w*$/ig;
@@ -355,7 +359,7 @@ $(".registration").on("submit", function(){
 		return false;
 	}
 
-	var user = $("input[name=email]").val()
+	var user = $("input[name=login]").val()
 	localStorage.setItem("user", user);
 	localStorage.setItem("password", pass);
 	localStorage.setItem("auth_source", "email");
@@ -365,6 +369,7 @@ $(".registration").on("submit", function(){
 $(".auth").on("submit", function(){
 	var user = $(".auth .login").val();
 	var pass = $(".auth .password").val();
+
 	localStorage.setItem("user", user);
 	localStorage.setItem("password", pass);
 	localStorage.setItem("auth_source", "email");
@@ -382,8 +387,9 @@ if(auth_source != ''){
 	$("#email-login, #vk-login, #sign-up").fadeOut(0);
 	$("#logout").fadeIn(0);
 	$(".addPost").fadeIn(0);
-	if(user != null){
+	if(user != null && user != undefined){
 		$(".greeting").append(`Привет, ${user}`);
+		$(".user").val(user);
 	}
 	$(".user").val(user);
 } else {

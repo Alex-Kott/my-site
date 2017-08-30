@@ -7,6 +7,10 @@
 	<h2>Неправильный пароль</h2>
 {% endif %}
 
+{% if error == 'user_exist' %}
+	<h2>Такой пользователь уже зарегистрирован</h2>
+{% endif %}
+
 <script>
 
 	localStorage.removeItem("user");
