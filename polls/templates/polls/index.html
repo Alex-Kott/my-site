@@ -1,10 +1,15 @@
 
 <div class="header">
 	<div>
-		<span class="title">Django-блог</span>
+		<span class="title">Django-блог</span><br>
+		<center>
+			<span class="greeting" ></span>
+		</center>
 	</div>
 	<div id="auth-buttons">
-		<button id="login">Войти</button>
+		<button id="sign-up">Регистрация</button>
+		<button id="email-login">Войти через почту</button>
+		<button id="vk-login">Войти через VK</button>
 		<button id="logout">Выйти</button>
 	</div>
 
@@ -12,7 +17,7 @@
 
 
 <div class="main">
-	<form method="POST">
+	<form method="POST" action="add_post/">
 		{% csrf_token %}
 		<div class="posts">
 		{% if posts %}
@@ -31,13 +36,30 @@
 		</div>
 		<div class="editWindow">
 			<input type="text" name="txt" class="txt">
-			<input type="text" name="username" class="username" placeholder="Автор">
+			<input type="text" name="user" class="user" placeholder="Автор">
 		</div>
 		
 		<input type="submit" class="savePost" value="Сохранить пост">
 		<input type="button" class="addPost" value="Добавить пост">
 	</form>
 </div>
+
+<form class="registration" action="sign-up/" method="POST">
+	{% csrf_token %}
+	<span class="close">×</span>
+	<input type="text" name="login" class="login">
+	<input type="password" name="password">
+	<input type="password" name="password2">
+	<input type="submit" value="Регистрация">
+</form>
+
+<form class="auth" action="auth/" method="POST">
+	{% csrf_token %}
+	<span class="close">×</span>
+	<input type="login" name="login" class="login">
+	<input type="password" name="password" class="password">
+	<input type="submit" value="Войти">
+</form>
 
 
 <style>
@@ -59,11 +81,23 @@
 	display: none;
 }
 
+#auth-buttons{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
 #auth-buttons button{
-	width: 200px;
+	width: 150px;
 	height: 50px;
 	border-radius: 10px;
 	margin: 10px;
+	outline: none;
+	
+}
+
+#auth-buttons #sign-up{
 
 }
 
@@ -91,8 +125,6 @@
 }
 
 input[type=text]{
-	width: 100%;
-	border-radius: 10px;
 	padding: 5px;
 	margin: 5px 0;
 }
@@ -116,6 +148,7 @@ textarea, .txt{
 	font-weight: bold;
 	border: 0;
 	margin: 10px 0;
+	display: none;
 }
 
 .savePost{
@@ -133,6 +166,40 @@ textarea, .txt{
 	opacity: 0.5;
 	margin: 10px;
 }
+
+.registration, .auth{
+	display: none;
+	position: absolute;
+	width: 40%;
+	background: #86b9e4;
+	border-radius: 10px;
+	padding: 10px;
+	left: 30%;
+	top: 180px;
+}
+
+.registration input, .auth input{
+	display: block;
+	margin: 10px auto;
+	padding: 5px;
+	border: none;
+}
+
+.registration .close, .auth .close{
+	display: inline-block;
+	margin: 0 10px;
+	position: absolute;
+	right:0;
+	font-family: arial;
+    font-weight: bold;
+    font-size: 1.4em;
+    cursor: pointer;
+}
+
+.registration input[type=submit], .auth input[type=submit]{
+	border-radius: 5px;
+	padding: 5px 15px;
+}
 </style>
 
 <script src="https://vk.com/js/api/openapi.js" type="text/javascript"></script>
@@ -141,6 +208,7 @@ textarea, .txt{
   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
   crossorigin="anonymous"></script>
 <script>
+
 
 var user_id;
 var group_link;
@@ -154,6 +222,7 @@ var intervalIds;
 var timeoutStack = [];
 var isLogin = false;
 var to = 500; // timeout. По хорошему его нужно автоматически вычислять в зависимости от кол-ва друзей у юзера
+var auth_source = localStorage.getItem("auth_source"); // авторизован через vk или email
 
 
 var vk = {
@@ -172,36 +241,52 @@ var vk = {
                 if (response.session) {
                     vk.data.user = response.session.user;
                     $("#user").val(vk.data.user.href);
-                    $("#login").css({"display":"none"});
+                    $("#vk-login, #email-login, #sign-up").css({"display":"none"});
                     $("#logout").css({"display":"block"});
                     isLogin = true;
                     
-                    var author = vk.data.user.first_name+" "+vk.data.user.last_name;
-                    $(".username").val(author);
+                    var user = vk.data.user.first_name+" "+vk.data.user.last_name;
+                    $(".user").val(user);
 
                     user_link = $("#user").val();
 				    var re = /\/{0}\w*$/ig;
 				    var screen_name = re.exec(user_link);
 				    setUserId(screen_name[0]);
+				    auth_source = "vk";
+				    localStorage.setItem("auth_source", "vk");
+				    localStorage.setItem("user", user);
+				    window.location.replace("/");
                 } else alert("Не удалось войти!");
             }
         })();
     }
 }
 
-$(document).ready(vk.init());
+$(document).ready(function(){
+	if(auth_source != 'email'){
+		//vk.init()
+	}
+});
 
-$("#login").on("click", function(){
+$("#vk-login").on("click", function(){
 	vk.init();
 })
 
 $("#logout").on("click", function(){
+	localStorage.removeItem("user");
+	localStorage.removeItem("password");
+	localStorage.setItem("auth_source", "");
+	$(".addPost").fadeOut(0);
+	$("#vk-login, #email-login, #sign-up").css({"display":"block"});
+		$("#logout").css({"display":"none"});
+	auth_source = '';
 	$("#stop-search").trigger("click");
 	VK.Auth.logout(function(r){
-		$("#login").css({"display":"block"});
-		$("#logout").css({"display":"none"});
+		console.log("LOL")
+		
 		isLogin = false;
 	})
+	window.location.replace("/");
 })
 
 function setUserId(screen_name) {
@@ -227,17 +312,17 @@ $(".savepost").on("click", function(){
 		posts = new Array();
 	}
 	try{
-		var author = vk.data.user.first_name+" "+vk.data.user.last_name;
+		var user = vk.data.user.first_name+" "+vk.data.user.last_name;
 	} catch(err){
 		console.log(err)
-		author = "User1"
+		user = "User1"
 	}
 
 
 	var text = $("textarea").val()
 	var post = {
 		text: text,
-		author: author
+		user: user
 	}
 	posts.push(post);
 	localStorage.setItem("posts", JSON.stringify(posts))
@@ -249,6 +334,61 @@ $(".savepost").on("click", function(){
 	$(".addPost").fadeIn(200);
 })
 
+$("#auth-buttons #sign-up").on("click", function(){
+	$(".registration").fadeIn(300);
+});
+
+$("#auth-buttons #email-login").on("click", function(){
+	$(".auth").fadeIn(300);
+});
+
+$(".close").on("click", function(){
+	$(this).parent("form").fadeOut(300);
+})
+
+
+$(".registration").on("submit", function(){
+	var pass = $("input[name=password]").val()	
+	var pass2 = $("input[name=password2]").val()	
+	if(pass !== pass2){
+		alert("Пароли не совпадают");
+		return false;
+	}
+
+	var user = $("input[name=email]").val()
+	localStorage.setItem("user", user);
+	localStorage.setItem("password", pass);
+	localStorage.setItem("auth_source", "email");
+
+});
+
+$(".auth").on("submit", function(){
+	var user = $(".auth .login").val();
+	var pass = $(".auth .password").val();
+	localStorage.setItem("user", user);
+	localStorage.setItem("password", pass);
+	localStorage.setItem("auth_source", "email");
+	auth_source = "email";
+});
+
+var user = localStorage.getItem("user");
+console.log(user)
+if(user != null){
+	
+}
+
+if(auth_source != ''){
+	$("#email-login, #vk-login, #sign-up").fadeOut(0);
+	$("#logout").fadeIn(0);
+	$(".addPost").fadeIn(0);
+	$(".greeting").append(`Привет, ${user}`);
+	$(".user").val(user);
+} else {
+	$("#email-login, #vk-login, #sign-up").fadeIn(0);
+	$("#logout").fadeOut(0);
+	
+
+}
 
 
 </script>

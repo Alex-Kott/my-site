@@ -1,0 +1,15 @@
+<a href="/"><h1>Вернуться на главную</h1></a>
+{% if error == 'user_not_found' %}
+	<h2>Пользователь {{ user }} не найден </h2>
+{% endif %}
+
+{% if error == 'wrong_password' %}
+	<h2>Неправильный пароль</h2>
+{% endif %}
+
+<script>
+
+	localStorage.removeItem("user");
+	localStorage.removeItem("password");
+	localStorage.setItem("auth_source", "");
+</script>

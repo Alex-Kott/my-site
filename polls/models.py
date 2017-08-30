@@ -10,3 +10,8 @@ class Posts(models.Model):
 	post_text = models.TextField()
 	author = models.CharField(max_length = 100)
 	date = models.DateTimeField()
+
+class Users(models.Model):
+	login = models.CharField(max_length = 100)
+	password = models.CharField(max_length = 100)
+	date = models.DateTimeField()
