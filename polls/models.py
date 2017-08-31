@@ -12,6 +12,6 @@ class Posts(models.Model):
 	date = models.DateTimeField()
 
 class Users(models.Model):
-	login = models.CharField(max_length = 100)
+	login = models.CharField(max_length = 100, unique = True)
 	password = models.CharField(max_length = 100)
 	date = models.DateTimeField()
