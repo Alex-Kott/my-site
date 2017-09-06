@@ -8,4 +8,5 @@ urlpatterns = [
 	url(r'^add_post/$', views.add_post, name = 'add_post'),
 	url(r'^sign-up/$', views.signup, name = 'sign_up'),
 	url(r'^auth/$', views.auth, name = 'auth'),
+	url(r'^remove-post/$', views.remove, name = 'remove'),
 ]

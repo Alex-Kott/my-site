@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.utils import timezone
 import smtplib
@@ -94,3 +94,8 @@ def auth(request):
 	
 	return redirect("/")
 
+def remove(request):
+	data = request.POST
+	post_id = data['post']
+	Posts.remove(post_id)
+	return JsonResponse({})
